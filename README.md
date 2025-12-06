@@ -123,6 +123,7 @@ Users are rate-limited to prevent spam (10 second cooldown by default):
 | `OPENROUTER_API_KEY` | _(required)_ | Your OpenRouter API key |
 | `PORT` | `3042` | Gateway HTTP port |
 | `MODEL` | `qwen/qwen3-4b:free` | OpenRouter model ID |
+| `REPO_URL` | _(optional)_ | GitHub repo URL for OpenRouter attribution |
 
 **Popular free models:**
 - `qwen/qwen3-4b:free` (default, fast and capable)
@@ -140,6 +141,7 @@ Edit these variables at the top of the script:
 set llmbot_gateway "http://127.0.0.1:3042/chat"
 set llmbot_timeout 15000                    ;# 15 seconds
 set llmbot_rate_limit 10                    ;# 10 seconds between requests
+set llmbot_max_response_size 50000          ;# 50KB max response size
 ```
 
 ---
@@ -198,8 +200,9 @@ In IRC DCC chat or partyline:
 
 ### Gateway errors
 
-**"Gateway not configured":**
+**Gateway won't start / exits immediately:**
 - Missing `OPENROUTER_API_KEY` in `.env`
+- Gateway validates API key on startup and exits if not configured
 
 **"LLM service error":**
 - Check OpenRouter API status: https://status.openrouter.ai/
@@ -357,4 +360,4 @@ MIT
 
 - OpenRouter Docs: https://openrouter.ai/docs
 - Eggdrop Wiki: https://docs.eggheads.org/
-- Issues: https://github.com/yourusername/eggdrop-ai/issues
+- Issues: https://github.com/splinesreticulating/eggdrop-ai/issues

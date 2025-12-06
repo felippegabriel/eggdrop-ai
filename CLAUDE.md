@@ -53,18 +53,21 @@ From Eggdrop DCC/partyline:
 ## Architecture Details
 
 ### Gateway (gateway/server.ts)
-- Single TypeScript file Express server
+- Single TypeScript file Express server with helmet security headers
 - Two endpoints:
   - `GET /health` - Health check (returns "OK")
   - `POST /chat` - Main LLM endpoint
 - Request format: `{message: string, user: string, channel: string}`
 - Response: Plain text (not JSON) for easy Tcl parsing
-- Message limits: 500 chars max, 100 token responses
-- Error handling returns HTTP error codes with plain text messages
+- Message limits: 1000 chars max input (trimmed to 500), 100 token responses
+- Request body size limit: 10KB
+- API timeout: 30 seconds with AbortController
+- Security: Input validation, control character sanitization, localhost-only binding
+- Error handling returns HTTP error codes with plain text messages (no status code leakage)
 - Logs all requests with timestamp, user, channel, and token usage
 
 ### System Prompt Philosophy
-Bot personality is defined in `gateway/server.ts` SYSTEM_PROMPT constant (lines 15-25). The bot is:
+Bot personality is defined in `gateway/server.ts` SYSTEM_PROMPT constant (lines 35-46). The bot is:
 - Extremely concise (1-2 sentences max)
 - No greetings, emojis, or verbosity
 - Direct answers only
@@ -73,24 +76,29 @@ Bot personality is defined in `gateway/server.ts` SYSTEM_PROMPT constant (lines 
 When modifying bot behavior, edit this constant rather than adding code logic.
 
 ### Eggdrop Script (eggdrop/eggdrop-ai.tcl)
-- Triggers dynamically using bot's nickname: `@<botnick> <message>` or `<botnick>: <message>` (regex in lines 32-38)
+- Triggers dynamically using bot's nickname: `@<botnick> <message>` or `<botnick>: <message>` (string match in lines 36-42)
+- Uses `string match` instead of regex for security (prevents regex injection)
 - Uses Eggdrop's `$botnick` variable for generic trigger matching
 - Per-user rate limiting: 10s cooldown (configurable via `llmbot_rate_limit`)
 - Rate limit storage: in-memory array `llmbot_last_request` keyed by `nick!channel`
 - Cleanup timer: runs every 5 minutes to clear old rate limit entries
-- JSON escaping: custom `llmbot_json_escape` proc handles special chars
+- Response size limit: 50KB max (configurable via `llmbot_max_response_size`)
+- JSON construction: uses `format` command for readability (lines 69-72)
+- IRC sanitization: removes control characters to prevent command injection
 - Error handling: catches HTTP failures and displays user-friendly messages
 
 ### Configuration
 Environment variables in `gateway/.env`:
-- `OPENROUTER_API_KEY` - Required, get from https://openrouter.ai/keys
+- `OPENROUTER_API_KEY` - Required, validated on startup (get from https://openrouter.ai/keys)
 - `PORT` - Default 3042
 - `MODEL` - Default qwen/qwen3-4b:free
+- `REPO_URL` - Optional, GitHub repo URL for OpenRouter attribution
 
 Tcl script variables (top of `eggdrop/eggdrop-ai.tcl`):
 - `llmbot_gateway` - Gateway URL (default: http://127.0.0.1:3042/chat)
 - `llmbot_timeout` - HTTP timeout in ms (default: 15000)
 - `llmbot_rate_limit` - Seconds between requests per user (default: 10)
+- `llmbot_max_response_size` - Max response size in bytes (default: 50000)
 
 ## Key Implementation Details
 
@@ -103,16 +111,18 @@ Implemented in Tcl, not gateway:
 
 ### JSON Handling
 Tcl script manually constructs JSON (no library):
-- Escapes: `\ " \n \r \t` using `string map`
-- Build payload with string interpolation
-- Gateway uses Express built-in `express.json()` middleware
+- Escapes: `\ " \n \r \t \f \b` using `string map`
+- Removes control characters (0x00-0x1F) with regsub
+- Builds payload using `format` command for readability
+- Gateway uses Express built-in `express.json()` middleware with 10KB limit
 
 ### OpenRouter Integration
 Gateway forwards requests to `https://openrouter.ai/api/v1/chat/completions`:
 - Authorization header with Bearer token
-- Custom headers: `HTTP-Referer`, `X-Title` for attribution
+- Custom headers: `HTTP-Referer` (from REPO_URL), `X-Title` for attribution
 - Messages array: system prompt + user message
-- Parameters: `max_tokens: 100`, `temperature: 0.7`, `top_p: 0.9`
+- Parameters: `max_tokens: 100`, `temperature: 0.7`, `top_p: 0.9` (constants lines 31-33)
+- 30 second timeout with AbortController
 - Response extraction: `data.choices[0].message.content`
 
 ### TypeScript Configuration
@@ -137,10 +147,10 @@ Eggdrop integration:
 ## Common Modifications
 
 ### Changing bot personality
-Edit `SYSTEM_PROMPT` in `gateway/server.ts` (lines 15-25)
+Edit `SYSTEM_PROMPT` in `gateway/server.ts` (lines 35-46)
 
 ### Changing trigger patterns
-Edit regex patterns in `eggdrop/eggdrop-ai.tcl` (lines 32-38). The script uses `$botnick` variable to automatically match the bot's configured nickname.
+Edit string match patterns in `eggdrop/eggdrop-ai.tcl` (lines 36-42). The script uses `$botnick` variable to automatically match the bot's configured nickname. Uses `string match` instead of regex for security.
 
 ### Adjusting rate limits
 Edit `llmbot_rate_limit` in `eggdrop/eggdrop-ai.tcl` (line 19)
@@ -149,4 +159,10 @@ Edit `llmbot_rate_limit` in `eggdrop/eggdrop-ai.tcl` (line 19)
 Set `MODEL` in `gateway/.env` to any OpenRouter model ID
 
 ### Increasing response length
-Edit `max_tokens` in `gateway/server.ts` (line 79) and update system prompt accordingly
+Edit `MAX_TOKENS` constant in `gateway/server.ts` (line 31) and update system prompt accordingly
+
+### Adjusting security limits
+- Gateway input validation: Edit `MAX_MESSAGE_LENGTH`, `MAX_USER_LENGTH`, `MAX_CHANNEL_LENGTH` (lines 26-28)
+- Gateway message trimming: Edit `TRIM_MESSAGE_TO` (line 29)
+- Gateway timeout: Edit `API_TIMEOUT_MS` (line 30)
+- Tcl response size: Edit `llmbot_max_response_size` (line 20)
