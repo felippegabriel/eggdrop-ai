@@ -26,6 +26,7 @@ array set llmbot_last_request {}
 bind pub * * llmbot_pub_handler
 
 proc llmbot_pub_handler {nick uhost hand chan text} {
+    putlog "DEBUG: Handler called - nick=$nick chan=$chan text=$text botnick=$::botnick"
     global llmbot_last_request llmbot_rate_limit botnick
 
     # Parse trigger and extract query (avoid regex for security)
