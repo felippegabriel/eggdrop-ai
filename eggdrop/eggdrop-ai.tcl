@@ -66,7 +66,7 @@ proc llmbot_pub_handler {nick uhost hand chan text} {
 proc llmbot_query {nick chan message} {
     global llmbot_gateway llmbot_timeout llmbot_max_response_size
 
-    set payload [format {\{"message":"%s","user":"%s","channel":"%s"\}} \
+    set payload [format {{"message":"%s","user":"%s","channel":"%s"}} \
         [llmbot_json_escape $message] \
         [llmbot_json_escape $nick] \
         [llmbot_json_escape $chan]]

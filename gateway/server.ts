@@ -28,7 +28,7 @@ const MAX_USER_LENGTH = 100;
 const MAX_CHANNEL_LENGTH = 100;
 const TRIM_MESSAGE_TO = 500;
 const API_TIMEOUT_MS = 30000;
-const MAX_TOKENS = 100;
+const MAX_TOKENS = 300;
 const TEMPERATURE = 0.7;
 const TOP_P = 0.9;
 
@@ -42,6 +42,7 @@ const SYSTEM_PROMPT = `You are an IRC bot assistant. Your core traits:
 - Direct answers only
 - Skip politeness - just deliver information
 - If you don't know, say so in 5 words or less
+- No internal reasoning - respond directly
 
 You're in an IRC channel where bandwidth and attention are precious. Every word counts.`;
 
