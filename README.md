@@ -1,6 +1,6 @@
-# Soonyo AI - LLM Gateway for Eggdrop IRC Bot
+# Eggdrop AI
 
-A minimal, production-ready system that lets your Eggdrop IRC bot respond intelligently using OpenRouter's LLM API.
+A minimal, production-ready system that adds LLM intelligence to your Eggdrop IRC bot using OpenRouter's API.
 
 ## Architecture
 
@@ -11,10 +11,10 @@ IRC User → Eggdrop Bot → Local Gateway (Node/TS) → OpenRouter API
 ```
 
 **Flow:**
-1. User mentions `@soonyo` or `soonyo:` in IRC
+1. User mentions your bot (e.g., `@botname` or `botname:`) in IRC
 2. Eggdrop Tcl script POSTs message to local gateway
-3. Gateway forwards to OpenRouter with concise system prompt
-4. LLM generates 1-2 sentence reply
+3. Gateway forwards to OpenRouter with configurable system prompt
+4. LLM generates response
 5. Gateway returns plain text to Eggdrop
 6. Bot prints reply to channel
 
@@ -72,10 +72,10 @@ curl http://127.0.0.1:3042/health
 **Installation:**
 ```bash
 # Copy the Tcl script to your Eggdrop scripts directory
-cp eggdrop/soonyo.tcl /path/to/eggdrop/scripts/
+cp eggdrop/eggdrop-ai.tcl /path/to/eggdrop/scripts/
 
 # Add to eggdrop.conf
-echo 'source scripts/soonyo.tcl' >> /path/to/eggdrop/eggdrop.conf
+echo 'source scripts/eggdrop-ai.tcl' >> /path/to/eggdrop/eggdrop.conf
 
 # Rehash or restart
 # In IRC: .rehash
@@ -88,23 +88,27 @@ echo 'source scripts/soonyo.tcl' >> /path/to/eggdrop/eggdrop.conf
 
 ### In IRC:
 
+Mention your bot using `@botname` or `botname:` (where botname is your actual bot's nickname):
+
 ```
-<user> @soonyo what is TCP?
+<user> @mybot what is TCP?
 <bot> Transmission Control Protocol - reliable, ordered data delivery over networks.
 
-<user> soonyo: explain quantum computing
+<user> mybot: explain quantum computing
 <bot> Computers using quantum mechanics for parallel computation. Still mostly experimental.
 
-<user> @soonyo
+<user> @mybot
 <bot> user: yes?
 ```
 
 ### Rate Limiting:
 
+Users are rate-limited to prevent spam (10 second cooldown by default):
+
 ```
-<user> @soonyo test
+<user> @mybot test
 <bot> Sure!
-<user> @soonyo another test
+<user> @mybot another test
 <bot> user: please wait 8s
 ```
 
@@ -127,14 +131,14 @@ echo 'source scripts/soonyo.tcl' >> /path/to/eggdrop/eggdrop.conf
 
 See all models: https://openrouter.ai/models?order=newest&supported_parameters=tools
 
-### Eggdrop Script (`eggdrop/soonyo.tcl`)
+### Eggdrop Script (`eggdrop/eggdrop-ai.tcl`)
 
 Edit these variables at the top of the script:
 
 ```tcl
-set soonyo_gateway "http://127.0.0.1:3042/soonyo"
-set soonyo_timeout 15000                    ;# 15 seconds
-set soonyo_rate_limit 10                    ;# 10 seconds between requests
+set llmbot_gateway "http://127.0.0.1:3042/chat"
+set llmbot_timeout 15000                    ;# 15 seconds
+set llmbot_rate_limit 10                    ;# 10 seconds between requests
 ```
 
 ---
@@ -144,7 +148,7 @@ set soonyo_rate_limit 10                    ;# 10 seconds between requests
 ### Test the gateway directly:
 
 ```bash
-curl -X POST http://127.0.0.1:3042/soonyo \
+curl -X POST http://127.0.0.1:3042/chat \
   -H "Content-Type: application/json" \
   -d '{"message":"what is IRC?","user":"testuser","channel":"#test"}'
 ```
@@ -158,7 +162,7 @@ Internet Relay Chat - real-time text messaging protocol from 1988.
 
 In IRC DCC chat or partyline:
 ```tcl
-.tcl soonyo_query "testuser" "#test" "hello"
+.tcl llmbot_query "testuser" "#test" "hello"
 ```
 
 ---
@@ -175,7 +179,7 @@ In IRC DCC chat or partyline:
 2. **Check Eggdrop loaded the script:**
    ```
    .tcl info loaded
-   # Should list soonyo.tcl
+   # Should list eggdrop-ai.tcl
    ```
 
 3. **Check Eggdrop console:**
@@ -185,11 +189,11 @@ In IRC DCC chat or partyline:
    ```
 
 4. **Test trigger patterns:**
-   The bot only responds to:
-   - `@soonyo <message>`
-   - `soonyo: <message>`
-   
-   Not: `soonyo <message>` (no colon)
+   The bot responds to mentions using its configured nickname:
+   - `@botname <message>`
+   - `botname: <message>`
+
+   Not: `botname <message>` (without @ or colon)
 
 ### Gateway errors
 
@@ -207,9 +211,9 @@ In IRC DCC chat or partyline:
 
 ### Rate limit issues
 
-Edit `soonyo_rate_limit` in `soonyo.tcl`:
+Edit `llmbot_rate_limit` in `eggdrop-ai.tcl`:
 ```tcl
-set soonyo_rate_limit 5  ;# Reduce to 5 seconds
+set llmbot_rate_limit 5  ;# Reduce to 5 seconds
 ```
 
 ---
@@ -219,7 +223,7 @@ set soonyo_rate_limit 5  ;# Reduce to 5 seconds
 The bot's personality is defined in `gateway/server.ts`:
 
 ```typescript
-const SYSTEM_PROMPT = `You are Soonyo, an IRC bot assistant. Your core traits:
+const SYSTEM_PROMPT = `You are an IRC bot assistant. Your core traits:
 
 - Only respond when directly addressed
 - Extremely concise: 1-2 sentences maximum
@@ -243,24 +247,24 @@ Edit this to customize the bot's behavior.
 ```bash
 npm install -g pm2
 cd gateway
-pm2 start npm --name soonyo-gateway -- start
+pm2 start npm --name eggdrop-ai-gateway -- start
 pm2 save
 pm2 startup  # Auto-start on reboot
 ```
 
 ### Using systemd:
 
-Create `/etc/systemd/system/soonyo-gateway.service`:
+Create `/etc/systemd/system/eggdrop-ai-gateway.service`:
 
 ```ini
 [Unit]
-Description=Soonyo LLM Gateway
+Description=Eggdrop AI LLM Gateway
 After=network.target
 
 [Service]
 Type=simple
 User=eggdrop
-WorkingDirectory=/path/to/soonyo-ai/gateway
+WorkingDirectory=/path/to/eggdrop-ai/gateway
 ExecStart=/usr/bin/npm start
 Restart=on-failure
 Environment=NODE_ENV=production
@@ -271,9 +275,9 @@ WantedBy=multi-user.target
 
 Enable and start:
 ```bash
-sudo systemctl enable soonyo-gateway
-sudo systemctl start soonyo-gateway
-sudo systemctl status soonyo-gateway
+sudo systemctl enable eggdrop-ai-gateway
+sudo systemctl start eggdrop-ai-gateway
+sudo systemctl status eggdrop-ai-gateway
 ```
 
 ### Security considerations:
@@ -306,9 +310,9 @@ Update `MODEL` in `.env` to any OpenRouter model. Costs typically $0.001-0.01 pe
 ### Project structure:
 
 ```
-soonyo-ai/
+eggdrop-ai/
 ├── eggdrop/
-│   └── soonyo.tcl          # Eggdrop Tcl script
+│   └── eggdrop-ai.tcl      # Eggdrop Tcl script
 ├── gateway/
 │   ├── server.ts           # Express gateway service
 │   ├── package.json
@@ -352,4 +356,4 @@ MIT
 
 - OpenRouter Docs: https://openrouter.ai/docs
 - Eggdrop Wiki: https://docs.eggheads.org/
-- Issues: https://github.com/splinesreticulating/soonyo-ai/issues
+- Issues: https://github.com/yourusername/eggdrop-ai/issues

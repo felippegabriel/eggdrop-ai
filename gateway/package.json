@@ -1,7 +1,7 @@
 {
-  "name": "soonyo-gateway",
+  "name": "eggdrop-ai-gateway",
   "version": "1.0.0",
-  "description": "LLM gateway service for Soonyo IRC bot",
+  "description": "LLM gateway service for Eggdrop AI IRC bot",
   "main": "server.ts",
   "scripts": {
     "dev": "tsx watch server.ts",

@@ -1,9 +1,9 @@
 ######################################################################
-# soonyo.tcl - LLM-powered IRC bot via local gateway
+# eggdrop-ai.tcl - LLM-powered IRC bot via local gateway
 #
 # Installation:
 #   1. Copy this file to your eggdrop/scripts/ directory
-#   2. Add "source scripts/soonyo.tcl" to your eggdrop.conf
+#   2. Add "source scripts/eggdrop-ai.tcl" to your eggdrop.conf
 #   3. .rehash or restart the bot
 #
 # Requirements:
@@ -14,83 +14,84 @@
 package require http
 
 # Configuration
-set soonyo_gateway "http://127.0.0.1:3042/soonyo"
-set soonyo_timeout 15000
-set soonyo_rate_limit 10 ;# seconds between requests per user
+set llmbot_gateway "http://127.0.0.1:3042/chat"
+set llmbot_timeout 15000
+set llmbot_rate_limit 10 ;# seconds between requests per user
 
 # Rate limiting storage: array of user -> timestamp
-array set soonyo_last_request {}
+array set llmbot_last_request {}
 
 # Bind to public channel messages
-bind pub - * soonyo_pub_handler
+bind pub - * llmbot_pub_handler
 
-proc soonyo_pub_handler {nick uhost hand chan text} {
-    global soonyo_last_request soonyo_rate_limit
-    
-    # Check if message mentions the bot
+proc llmbot_pub_handler {nick uhost hand chan text} {
+    global llmbot_last_request llmbot_rate_limit botnick
+
+    # Check if message mentions the bot (using actual bot nickname)
     set trigger ""
-    if {[regexp -nocase {^@soonyo[:\s]+(.+)} $text match query]} {
-        set trigger "@soonyo"
-    } elseif {[regexp -nocase {^soonyo[:\s]+(.+)} $text match query]} {
-        set trigger "soonyo:"
+    set bot_pattern [string tolower $botnick]
+    if {[regexp -nocase "^@${bot_pattern}\[:\\s\]+(.+)" $text match query]} {
+        set trigger "@${botnick}"
+    } elseif {[regexp -nocase "^${bot_pattern}\[:\\s\]+(.+)" $text match query]} {
+        set trigger "${botnick}:"
     } else {
         return 0
     }
-    
+
     # Rate limiting check
     set now [clock seconds]
     set user_key "${nick}!${chan}"
-    
-    if {[info exists soonyo_last_request($user_key)]} {
-        set elapsed [expr {$now - $soonyo_last_request($user_key)}]
-        if {$elapsed < $soonyo_rate_limit} {
-            set wait [expr {$soonyo_rate_limit - $elapsed}]
+
+    if {[info exists llmbot_last_request($user_key)]} {
+        set elapsed [expr {$now - llmbot_last_request($user_key)}]
+        if {$elapsed < $llmbot_rate_limit} {
+            set wait [expr {$llmbot_rate_limit - $elapsed}]
             putserv "PRIVMSG $chan :$nick: please wait ${wait}s"
             return 0
         }
     }
-    
+
     # Update rate limit timestamp
-    set soonyo_last_request($user_key) $now
-    
+    set llmbot_last_request($user_key) $now
+
     # Clean up the query
     set query [string trim $query]
-    
+
     if {$query eq ""} {
         putserv "PRIVMSG $chan :$nick: yes?"
         return 0
     }
-    
+
     # Send request to gateway
-    soonyo_query $nick $chan $query
-    
+    llmbot_query $nick $chan $query
+
     return 0
 }
 
-proc soonyo_query {nick chan message} {
-    global soonyo_gateway soonyo_timeout
-    
+proc llmbot_query {nick chan message} {
+    global llmbot_gateway llmbot_timeout
+
     # Build JSON payload
-    set json_message [soonyo_json_escape $message]
-    set json_user [soonyo_json_escape $nick]
-    set json_channel [soonyo_json_escape $chan]
-    
+    set json_message [llmbot_json_escape $message]
+    set json_user [llmbot_json_escape $nick]
+    set json_channel [llmbot_json_escape $chan]
+
     set payload "\{\"message\":\"$json_message\",\"user\":\"$json_user\",\"channel\":\"$json_channel\"\}"
-    
+
     # Make HTTP POST request
     if {[catch {
-        set token [::http::geturl $soonyo_gateway \
+        set token [::http::geturl $llmbot_gateway \
             -query $payload \
-            -timeout $soonyo_timeout \
+            -timeout $llmbot_timeout \
             -type "application/json" \
             -headers [list "Content-Type" "application/json"]]
-        
+
         set status [::http::status $token]
         set ncode [::http::ncode $token]
         set data [::http::data $token]
-        
+
         ::http::cleanup $token
-        
+
         if {$status eq "ok" && $ncode == 200} {
             # Split response into lines if needed (for long responses)
             set lines [split $data "\n"]
@@ -108,7 +109,7 @@ proc soonyo_query {nick chan message} {
     }
 }
 
-proc soonyo_json_escape {text} {
+proc llmbot_json_escape {text} {
     # Escape special JSON characters
     set text [string map {
         "\\" "\\\\"
@@ -121,19 +122,19 @@ proc soonyo_json_escape {text} {
 }
 
 # Cleanup old rate limit entries (every 5 minutes)
-bind time - "*/5 * * * *" soonyo_cleanup
+bind time - "*/5 * * * *" llmbot_cleanup
 
-proc soonyo_cleanup {min hour day month year} {
-    global soonyo_last_request soonyo_rate_limit
-    
+proc llmbot_cleanup {min hour day month year} {
+    global llmbot_last_request llmbot_rate_limit
+
     set now [clock seconds]
-    set cutoff [expr {$now - ($soonyo_rate_limit * 10)}]
-    
-    foreach key [array names soonyo_last_request] {
-        if {$soonyo_last_request($key) < $cutoff} {
-            unset soonyo_last_request($key)
+    set cutoff [expr {$now - ($llmbot_rate_limit * 10)}]
+
+    foreach key [array names llmbot_last_request] {
+        if {$llmbot_last_request($key) < $cutoff} {
+            unset llmbot_last_request($key)
         }
     }
 }
 
-putlog "soonyo.tcl loaded - LLM gateway ready"
+putlog "eggdrop-ai.tcl loaded - LLM gateway ready"

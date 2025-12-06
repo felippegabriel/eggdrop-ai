@@ -12,7 +12,7 @@ const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const MODEL = process.env.MODEL || 'qwen/qwen-2.5-7b-instruct:free';
 
 // System prompt defining bot personality
-const SYSTEM_PROMPT = `You are Soonyo, an IRC bot assistant. Your core traits:
+const SYSTEM_PROMPT = `You are an IRC bot assistant. Your core traits:
 
 - Only respond when directly addressed
 - Extremely concise: 1-2 sentences maximum
@@ -24,7 +24,7 @@ const SYSTEM_PROMPT = `You are Soonyo, an IRC bot assistant. Your core traits:
 
 You're in an IRC channel where bandwidth and attention are precious. Every word counts.`;
 
-interface SoonyoRequest {
+interface ChatRequest {
   message: string;
   user: string;
   channel: string;
@@ -36,9 +36,9 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 // Main LLM endpoint
-app.post('/soonyo', async (req: Request, res: Response) => {
+app.post('/chat', async (req: Request, res: Response) => {
   try {
-    const { message, user, channel } = req.body as SoonyoRequest;
+    const { message, user, channel } = req.body as ChatRequest;
 
     // Validate input
     if (!message || typeof message !== 'string') {
@@ -61,8 +61,8 @@ app.post('/soonyo', async (req: Request, res: Response) => {
       headers: {
         'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://github.com/splinesreticulating/soonyo-ai',
-        'X-Title': 'Soonyo IRC Bot',
+        'HTTP-Referer': 'https://github.com/yourusername/eggdrop-ai',
+        'X-Title': 'Eggdrop AI Bot',
       },
       body: JSON.stringify({
         model: MODEL,
@@ -115,7 +115,7 @@ app.post('/soonyo', async (req: Request, res: Response) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Soonyo gateway listening on port ${PORT}`);
+  console.log(`Eggdrop AI gateway listening on port ${PORT}`);
   console.log(`Model: ${MODEL}`);
   console.log(`API key configured: ${OPENROUTER_API_KEY ? 'yes' : 'NO - SET OPENROUTER_API_KEY'}`);
 });

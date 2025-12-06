@@ -1,6 +1,6 @@
 # VPS Installation Guide
 
-Quick setup guide for deploying Soonyo on your VPS.
+Quick setup guide for deploying Eggdrop AI on your VPS.
 
 ## Prerequisites
 
@@ -22,8 +22,8 @@ ssh eggdrop@your-vps-ip
 
 ```bash
 cd ~
-git clone https://github.com/splinesreticulating/soonyo-ai.git
-cd soonyo-ai
+git clone https://github.com/yourusername/eggdrop-ai.git
+cd eggdrop-ai
 ```
 
 ### 3. Set up the gateway
@@ -52,7 +52,7 @@ npm start
 
 You should see:
 ```
-Soonyo gateway listening on port 3042
+Eggdrop AI gateway listening on port 3042
 Model: qwen/qwen-2.5-7b-instruct:free
 API key configured: yes
 ```
@@ -64,7 +64,7 @@ Keep this terminal open or Ctrl+C to stop.
 Open a new SSH session (or stop the gateway with Ctrl+C):
 
 ```bash
-cp ~/soonyo-ai/eggdrop/soonyo.tcl ~/eggdrop/scripts/
+cp ~/eggdrop-ai/eggdrop/eggdrop-ai.tcl ~/eggdrop/scripts/
 ```
 
 Edit your eggdrop config:
@@ -74,7 +74,7 @@ nano ~/eggdrop/eggdrop.conf
 
 Add this line at the end:
 ```tcl
-source scripts/soonyo.tcl
+source scripts/eggdrop-ai.tcl
 ```
 
 Save and exit.
@@ -101,8 +101,8 @@ Use PM2 for easy process management:
 npm install -g pm2
 
 # Start the gateway
-cd ~/soonyo-ai/gateway
-pm2 start npm --name soonyo-gateway -- start
+cd ~/eggdrop-ai/gateway
+pm2 start npm --name eggdrop-ai-gateway -- start
 
 # Save PM2 process list
 pm2 save
@@ -114,15 +114,15 @@ pm2 startup
 
 ### 8. Verify everything works
 
-In IRC:
+In IRC (replace `@botname` with your bot's actual nickname):
 ```
-<you> @soonyo hello
+<you> @botname hello
 <bot> Hi! How can I help?
 ```
 
 Check gateway logs:
 ```bash
-pm2 logs soonyo-gateway
+pm2 logs eggdrop-ai-gateway
 ```
 
 ---
@@ -132,34 +132,34 @@ pm2 logs soonyo-gateway
 ### Gateway management (PM2)
 
 ```bash
-pm2 status                    # Check status
-pm2 logs soonyo-gateway       # View logs
-pm2 restart soonyo-gateway    # Restart
-pm2 stop soonyo-gateway       # Stop
-pm2 delete soonyo-gateway     # Remove from PM2
+pm2 status                        # Check status
+pm2 logs eggdrop-ai-gateway       # View logs
+pm2 restart eggdrop-ai-gateway    # Restart
+pm2 stop eggdrop-ai-gateway       # Stop
+pm2 delete eggdrop-ai-gateway     # Remove from PM2
 ```
 
 ### Gateway management (manual)
 
 ```bash
-cd ~/soonyo-ai/gateway
+cd ~/eggdrop-ai/gateway
 npm start                     # Start in foreground
 ```
 
 ### Update the bot
 
 ```bash
-cd ~/soonyo-ai
+cd ~/eggdrop-ai
 git pull
 cd gateway
 npm install  # If package.json changed
-pm2 restart soonyo-gateway
+pm2 restart eggdrop-ai-gateway
 ```
 
 ### Reinstall Tcl script after updates
 
 ```bash
-cp ~/soonyo-ai/eggdrop/soonyo.tcl ~/eggdrop/scripts/
+cp ~/eggdrop-ai/eggdrop/eggdrop-ai.tcl ~/eggdrop/scripts/
 # Then .rehash in IRC
 ```
 
@@ -169,7 +169,7 @@ cp ~/soonyo-ai/eggdrop/soonyo.tcl ~/eggdrop/scripts/
 curl http://127.0.0.1:3042/health
 # Should return: OK
 
-curl -X POST http://127.0.0.1:3042/soonyo \
+curl -X POST http://127.0.0.1:3042/chat \
   -H "Content-Type: application/json" \
   -d '{"message":"test","user":"testuser","channel":"#test"}'
 ```
@@ -188,7 +188,7 @@ netstat -tulpn | grep 3042
 node --version
 
 # Check logs
-pm2 logs soonyo-gateway
+pm2 logs eggdrop-ai-gateway
 ```
 
 ### Bot doesn't respond
@@ -200,7 +200,7 @@ curl http://127.0.0.1:3042/health
 # Check if script loaded
 # In IRC DCC/partyline:
 .tcl info loaded
-# Should show soonyo.tcl
+# Should show eggdrop-ai.tcl
 
 # Check bot console
 .console +d
@@ -211,7 +211,7 @@ curl http://127.0.0.1:3042/health
 Your `.env` file is missing or `OPENROUTER_API_KEY` is not set.
 
 ```bash
-cd ~/soonyo-ai/gateway
+cd ~/eggdrop-ai/gateway
 cat .env
 # Should show your API key
 ```
@@ -220,7 +220,7 @@ cat .env
 
 ```bash
 # Make sure eggdrop user owns everything
-sudo chown -R eggdrop:eggdrop ~/soonyo-ai
+sudo chown -R eggdrop:eggdrop ~/eggdrop-ai
 sudo chown -R eggdrop:eggdrop ~/eggdrop
 ```
 
@@ -240,4 +240,4 @@ sudo chown -R eggdrop:eggdrop ~/eggdrop
 - Check the main README.md for detailed docs
 - OpenRouter docs: https://openrouter.ai/docs
 - Eggdrop docs: https://docs.eggheads.org/
-- GitHub issues: https://github.com/splinesreticulating/soonyo-ai/issues
+- GitHub issues: https://github.com/yourusername/eggdrop-ai/issues
