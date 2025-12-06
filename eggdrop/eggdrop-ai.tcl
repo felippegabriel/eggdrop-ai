@@ -127,4 +127,4 @@ proc llmbot_cleanup {min hour day month year} {
     }
 }
 
-putlog "eggdrop-ai.tcl loaded - LLM gateway ready"
+putlog "eggdrop-ai.tcl loaded - LLM gateway ready (FROM GIT REPO)"
