@@ -20,6 +20,17 @@ if (!OPENROUTER_API_KEY) {
 
 const app = express();
 app.use(helmet());
+
+// Debug middleware to log raw body before JSON parsing
+app.use((req, _res, next) => {
+  let data = '';
+  req.on('data', chunk => { data += chunk; });
+  req.on('end', () => {
+    if (data) console.log('Raw body:', data);
+  });
+  next();
+});
+
 app.use(express.json({ limit: '10kb' }));
 
 // Limits
