@@ -23,7 +23,7 @@ set llmbot_max_response_size 50000 ;# max bytes in LLM response (50KB)
 array set llmbot_last_request {}
 
 # Bind to public channel messages
-bind pub - * llmbot_pub_handler
+bind pub * * llmbot_pub_handler
 
 proc llmbot_pub_handler {nick uhost hand chan text} {
     global llmbot_last_request llmbot_rate_limit botnick
