@@ -66,7 +66,10 @@ proc llmbot_pub_handler {nick uhost hand chan text} {
 proc llmbot_query {nick chan message} {
     global llmbot_gateway llmbot_timeout llmbot_max_response_size
 
-    set payload "\{\"message\":\"[llmbot_json_escape $message]\",\"user\":\"[llmbot_json_escape $nick]\",\"channel\":\"[llmbot_json_escape $chan]\"\}"
+    set payload [format {\{"message":"%s","user":"%s","channel":"%s"\}} \
+        [llmbot_json_escape $message] \
+        [llmbot_json_escape $nick] \
+        [llmbot_json_escape $chan]]
 
     if {[catch {
         set token [::http::geturl $llmbot_gateway \
@@ -87,7 +90,7 @@ proc llmbot_query {nick chan message} {
                 set data [string range $data 0 $llmbot_max_response_size]
             }
 
-            # Sanitize and send (note: split on literal \n after sanitization replaces them with spaces)
+            # Sanitize and send each line
             foreach line [split [llmbot_sanitize_irc $data] "\n"] {
                 set line [string trim $line]
                 if {$line ne ""} { putserv "PRIVMSG $chan :$line" }

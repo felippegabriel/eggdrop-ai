@@ -149,5 +149,4 @@ app.post('/chat', async (req: Request, res: Response) => {
 app.listen(PORT, '127.0.0.1', () => {
   console.log(`Eggdrop AI gateway listening on 127.0.0.1:${PORT}`);
   console.log(`Model: ${MODEL}`);
-  console.log(`API key configured: ${OPENROUTER_API_KEY ? 'yes' : 'NO - SET OPENROUTER_API_KEY'}`);
 });
